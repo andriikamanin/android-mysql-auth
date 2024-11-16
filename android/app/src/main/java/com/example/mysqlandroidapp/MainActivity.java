@@ -4,6 +4,7 @@ package com.example.mysqlandroidapp;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
+import android.content.Intent;
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.SharedPreferences;
+
+
+import android.content.Intent;
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.SharedPreferences;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -23,40 +38,33 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText usernameEditText = findViewById(R.id.usernameEditText);
-        EditText emailEditText = findViewById(R.id.emailEditText);
-        EditText passwordEditText = findViewById(R.id.passwordEditText);
-        Button registerButton = findViewById(R.id.registerButton);
+        TextView usernameTextView = findViewById(R.id.usernameTextView);
+        TextView emailTextView = findViewById(R.id.emailTextView);
+        Button logoutButton = findViewById(R.id.logoutButton);
 
-        registerButton.setOnClickListener(v -> {
-            String username = usernameEditText.getText().toString().trim();
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
+        // Получаем данные из SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "Unknown User");
+        String email = sharedPreferences.getString("email", "No Email");
 
-            if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(MainActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        // Устанавливаем значения
+        usernameTextView.setText("Username: " + username);
+        emailTextView.setText("Email: " + email);
 
-            UserApi userApi = ApiService.getRetrofitInstance().create(UserApi.class);
-            Call<UserResponse> call = userApi.registerUser(username, email, password);
+        // Обработчик кнопки Logout
+        logoutButton.setOnClickListener(view -> {
+            // Очищаем SharedPreferences при выходе
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.clear();
+            editor.apply();
 
-            call.enqueue(new Callback<UserResponse>() {
-                @Override
-                public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        UserResponse userResponse = response.body();
-                        Toast.makeText(MainActivity.this, userResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Registration failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<UserResponse> call, Throwable t) {
-                    Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+            // Возвращаемся на экран логина
+            Intent logoutIntent = new Intent(MainActivity.this, LoginActivity.class);
+            logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(logoutIntent);
+            finish();
         });
     }
+
+
 }

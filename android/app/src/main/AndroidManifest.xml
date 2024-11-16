@@ -1,7 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mysqlandroidapp">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Разрешение на использование интернета -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Разрешение на доступ к сети -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:usesCleartextTraffic="true"
@@ -13,15 +17,26 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MySQLAndroidApp">
-        <activity android:name=".MainActivity"
+
+        <!-- Главная активность приложения -->
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
+
+        <!-- Активность для логина -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true" />
+
+        <!-- Активность для регистрации -->
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="true" />
 
     </application>
 </manifest>
