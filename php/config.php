@@ -1,5 +1,5 @@
 <?php
-$host = "localhost"; // Адрес сервера
+$host = "usersdatabase.chsygay2isy8.eu-central-1.rds.amazonaws.com"; // Адрес сервера
 $username = "root"; // Имя пользователя MySQL
 $password = ""; // Пароль MySQL (оставьте пустым, если без пароля)
 $dbname = "user_database"; // Название базы данных
