@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<form id="registerForm" class="form">
-    <p class="title">Register</p>
-    <p class="message">Signup now and get full access to our app.</p>
-
-    <label>
-        <input required="" placeholder="" type="text" name="username" class="input">
-        <span>Username</span>
-    </label>
+<form id="loginForm" class="form">
+    <p class="title">Login</p>
+    <p class="message">Enter your credentials to continue.</p>
 
     <label>
         <input required="" placeholder="" type="email" name="email" class="input">
@@ -26,27 +21,28 @@
         <span>Password</span>
     </label>
 
-    <button type="submit" class="submit">Register</button>
+    <button type="submit" class="submit">Login</button>
 
     <p class="signin">
-        Already have an account? <a href="javascript:redirectToLogin()">Login</a>
+        Don't have an account? <a href="javascript:redirectToRegister()">Register</a>
     </p>
 </form>
 
 <script>
-    document.getElementById('registerForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
         const formData = new FormData(this);
-        const username = formData.get('username');
         const email = formData.get('email');
         const password = formData.get('password');
 
-        Android.registerUser(username, email, password);
+        // Передача данных в Android через интерфейс
+        Android.loginUser(email, password);
     });
 
-    function redirectToLogin() {
-        Android.redirectToLogin();
+    // Функция для перехода на страницу регистрации
+    function redirectToRegister() {
+        Android.redirectToRegister();
     }
 </script>
 </body>

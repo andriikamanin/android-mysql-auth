@@ -1,5 +1,5 @@
 document.getElementById('registerForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Предотвращаем стандартное поведение формы
+    e.preventDefault();
 
     const formData = new FormData(this);
     const data = {
@@ -9,15 +9,13 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         confirmPassword: formData.get('confirmPassword')
     };
 
-    // Проверка совпадения паролей
     if (data.password !== data.confirmPassword) {
         alert('Passwords do not match!');
         return;
     }
 
     try {
-        // Отправляем данные на сервер через fetch
-        const response = await fetch('https://your-server-url/register.php', {
+        const response = await fetch('http://api.andkamrootdomain.click/myproject/register.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -31,8 +29,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 
         const result = await response.json();
         if (result.success) {
-            alert(result.message);
-            this.reset(); // Сброс формы
+            // Отправляем сообщение об успешной регистрации в Android WebView
+            Android.redirectToSuccess(data.username); // Вызов Java-кода из JavaScript
         } else {
             alert('Error: ' + result.message);
         }

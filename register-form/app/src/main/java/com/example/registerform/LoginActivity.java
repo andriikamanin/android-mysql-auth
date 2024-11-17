@@ -1,48 +1,36 @@
 package com.example.registerform;
+
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.registerform.models.UserResponse;
-import com.example.registerform.network.ApiService;
-import com.example.registerform.network.UserApi;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.Toast;
-
+import com.example.registerform.models.UserResponse;
+import com.example.registerform.network.ApiService;
+import com.example.registerform.network.UserApi;
 import androidx.appcompat.app.AppCompatActivity;
-
-
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-public class RegisterActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_login);
 
         WebView webView = findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
 
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("file:///android_asset/register_form.html");
+        webView.loadUrl("file:///android_asset/login_form.html");
 
+        // Добавляем интерфейс для взаимодействия с JavaScript
         webView.addJavascriptInterface(new WebAppInterface(webView), "Android");
     }
 
@@ -54,9 +42,9 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
-        public void registerUser(String username, String email, String password) {
+        public void loginUser(String email, String password) {
             UserApi userApi = ApiService.getRetrofitInstance().create(UserApi.class);
-            Call<UserResponse> call = userApi.registerUser(username, email, password);
+            Call<UserResponse> call = userApi.loginUser(email, password);
 
             call.enqueue(new Callback<UserResponse>() {
                 @Override
@@ -64,7 +52,7 @@ public class RegisterActivity extends AppCompatActivity {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
                         if (userResponse.isSuccess()) {
-                            webView.post(() -> webView.loadUrl("javascript:alert('Registration successful!')"));
+                            webView.post(() -> webView.loadUrl("javascript:alert('Login successful!')"));
                         } else {
                             webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
                         }
@@ -81,8 +69,8 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         @JavascriptInterface
-        public void redirectToLogin() {
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+        public void redirectToRegister() {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
         }
     }
