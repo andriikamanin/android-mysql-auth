@@ -62,12 +62,11 @@ public class RegisterActivity extends AppCompatActivity {
                         if (userResponse.isSuccess()) {
                             // Извлекаем объект User
                             UserResponse.User user = userResponse.getUser();
-                            Intent intent = new Intent(RegisterActivity.this, SuccessActivity.class);
-                            if (user != null) {
-                                intent.putExtra("username", user.getName()); // Передаем имя пользователя
-                            }
+                            Intent intent = new Intent(RegisterActivity.this, ProfileActivity.class);
+                            intent.putExtra("email", userResponse.getUser().getEmail()); // Передача email
                             startActivity(intent);
                             finish();
+
                         } else {
                             webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
                         }

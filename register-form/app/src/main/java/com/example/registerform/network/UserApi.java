@@ -26,17 +26,13 @@ public interface UserApi {
     );
 
     @FormUrlEncoded
-    @POST("update_user.php")
-    Call<UserResponse> updateUser(
-            @Field("name") String name,
-            @Field("email") String email
-    );
+    @POST("get_user.php")
+    Call<UserResponse> getUser(@Field("email") String email);
 
     @FormUrlEncoded
-    @POST("get_user.php")
-    Call<UserResponse> getUser(
-            @Field("email") String email
-    );
+    @POST("update_user.php")
+    Call<UserResponse> updateUser(@Field("username") String username, @Field("email") String email);
+
 
 
 }

@@ -2,9 +2,12 @@ package com.example.registerform;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.registerform.models.UserResponse;
@@ -18,9 +21,11 @@ import retrofit2.Response;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    private static final String TAG = "ProfileActivity";
+
     private ImageView avatarImageView;
-    private TextView nameTextView, emailTextView;
-    private Button editProfileButton;
+    private EditText nameEditText, emailEditText;
+    private Button updateButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,24 +33,25 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
 
         avatarImageView = findViewById(R.id.avatarImageView);
-        nameTextView = findViewById(R.id.nameTextView);
-        emailTextView = findViewById(R.id.emailTextView);
-        editProfileButton = findViewById(R.id.editProfileButton);
+        nameEditText = findViewById(R.id.nameEditText);
+        emailEditText = findViewById(R.id.emailEditText);
+        updateButton = findViewById(R.id.updateButton);
 
-        // Загрузка данных пользователя
+        // Загружаем данные пользователя
         loadUserData();
 
-        // Обработка нажатия кнопки "Изменить профиль"
-        editProfileButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            intent.putExtra("name", nameTextView.getText().toString());
-            intent.putExtra("email", emailTextView.getText().toString());
-            startActivity(intent);
-        });
+        // Обрабатываем нажатие кнопки "Изменить"
+        updateButton.setOnClickListener(v -> updateUserData());
     }
 
     private void loadUserData() {
-        String userEmail = getIntent().getStringExtra("email"); // Получаем email из Intent
+        String userEmail = getIntent().getStringExtra("email");
+
+        if (userEmail == null || userEmail.isEmpty()) {
+            Toast.makeText(this, "No email provided!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
 
         UserApi userApi = ApiService.getRetrofitInstance().create(UserApi.class);
         Call<UserResponse> call = userApi.getUser(userEmail);
@@ -56,20 +62,56 @@ public class ProfileActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     // Получаем данные пользователя из ответа
                     UserResponse.User user = response.body().getUser();
-                    if (user != null) {
-                        nameTextView.setText(user.getName());
-                        emailTextView.setText(user.getEmail());
+                    nameEditText.setText(user.getUsername());
+                    emailEditText.setText(user.getEmail());
 
-                        // Загрузка аватарки (используем заглушку, если в базе нет URL аватарки)
-                        String avatarUrl = "https://via.placeholder.com/150";
-                        Picasso.get().load(avatarUrl).into(avatarImageView);
-                    }
+                    // Загружаем аватар
+                    Picasso.get()
+                            .load(user.getUserAvatar())
+                            .placeholder(R.drawable.ic_avatar_placeholder) // Плейсхолдер на случай отсутствия аватарки
+                            .error(R.drawable.ic_avatar_placeholder) // Плейсхолдер на случай ошибки
+                            .into(avatarImageView);
+                } else {
+                    Log.d(TAG, "Error loading user data: " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    Toast.makeText(ProfileActivity.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                // Обработайте ошибку, если требуется
+                Log.e(TAG, "Error loading user data: " + t.getMessage());
+                Toast.makeText(ProfileActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateUserData() {
+        String updatedUsername = nameEditText.getText().toString().trim();
+        String updatedEmail = emailEditText.getText().toString().trim();
+
+        if (updatedUsername.isEmpty() || updatedEmail.isEmpty()) {
+            Toast.makeText(this, "Username and Email cannot be empty!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        UserApi userApi = ApiService.getRetrofitInstance().create(UserApi.class);
+        Call<UserResponse> call = userApi.updateUser(updatedUsername, updatedEmail);
+
+        call.enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    Toast.makeText(ProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.d(TAG, "Error updating user data: " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    Toast.makeText(ProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Log.e(TAG, "Error updating user data: " + t.getMessage());
+                Toast.makeText(ProfileActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

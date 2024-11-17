@@ -1,7 +1,6 @@
 package com.example.registerform.models;
 
 import com.google.gson.annotations.SerializedName;
-
 public class UserResponse {
     @SerializedName("success")
     private boolean success;
@@ -25,18 +24,25 @@ public class UserResponse {
     }
 
     public static class User {
-        @SerializedName("name")
-        private String name;
+        @SerializedName("username")
+        private String username;
 
         @SerializedName("email")
         private String email;
 
-        public String getName() {
-            return name;
+        @SerializedName("user_avatar")
+        private String userAvatar;
+
+        public String getUsername() {
+            return username;
         }
 
         public String getEmail() {
             return email;
+        }
+
+        public String getUserAvatar() {
+            return userAvatar;
         }
     }
 }

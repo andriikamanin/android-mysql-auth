@@ -6,6 +6,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.registerform.models.UserResponse;
@@ -51,30 +53,37 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
-                        if (userResponse.isSuccess()) {
-                            // Извлекаем объект User
-                            UserResponse.User user = userResponse.getUser();
-                            Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
-                            if (user != null) {
-                                intent.putExtra("username", user.getName());
-                                intent.putExtra("email", user.getEmail());
+
+                        if (userResponse.isSuccess()) { // Проверяем, что успех == true
+                            // Получаем данные пользователя
+                            if (userResponse.getUser() != null) {
+                                String userEmail = userResponse.getUser().getEmail();
+                                Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                                intent.putExtra("email", userEmail);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                webView.post(() -> webView.loadUrl("javascript:alert('Error: User data not found')"));
                             }
-                            startActivity(intent);
-                            finish();
                         } else {
+                            // Если сервер вернул сообщение об ошибке
                             webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
                         }
                     } else {
-                        webView.post(() -> webView.loadUrl("javascript:alert('Response Error')"));
+                        // Если ответ неуспешный
+                        webView.post(() -> webView.loadUrl("javascript:alert('Server error. Please try again.')"));
                     }
                 }
 
-
                 @Override
                 public void onFailure(Call<UserResponse> call, Throwable t) {
-                    webView.post(() -> webView.loadUrl("javascript:alert('Failed to connect to server')"));
+                    // Ошибка при подключении к серверу
+                    webView.post(() -> webView.loadUrl("javascript:alert('Failed to connect to server: " + t.getMessage() + "')"));
                 }
             });
+
+
+
         }
 
         @JavascriptInterface
