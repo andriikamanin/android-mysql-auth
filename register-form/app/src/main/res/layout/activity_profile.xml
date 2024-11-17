@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <!-- Круглый аватар -->
+    <ImageView
+        android:id="@+id/avatarImageView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="16dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_avatar_placeholder"
+        android:contentDescription="User Avatar"
+        android:background="@drawable/circular_background" />
+
+    <!-- Имя пользователя -->
+    <TextView
+        android:id="@+id/nameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="John Doe"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Почта пользователя -->
+    <TextView
+        android:id="@+id/emailTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="john.doe@example.com"
+        android:textSize="16sp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Кнопка для изменения данных -->
+    <Button
+        android:id="@+id/editProfileButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Profile" />
+</LinearLayout>

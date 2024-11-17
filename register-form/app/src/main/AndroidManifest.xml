@@ -30,7 +30,8 @@
             android:label="Register"
             android:theme="@style/Theme.RegisterForm" />
         <activity android:name=".SuccessActivity" />
-
+        <activity android:name=".EditProfileActivity"/>
+        <activity android:name=".ProfileActivity" />
 
 
     </application>

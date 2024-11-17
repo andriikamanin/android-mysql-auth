@@ -53,14 +53,19 @@ public class RegisterActivity extends AppCompatActivity {
             Call<UserResponse> call = userApi.registerUser(username, email, password);
 
             call.enqueue(new Callback<UserResponse>() {
+
                 @Override
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
 
                         if (userResponse.isSuccess()) {
+                            // Извлекаем объект User
+                            UserResponse.User user = userResponse.getUser();
                             Intent intent = new Intent(RegisterActivity.this, SuccessActivity.class);
-                            intent.putExtra("username", userResponse.getUsername());
+                            if (user != null) {
+                                intent.putExtra("username", user.getName()); // Передаем имя пользователя
+                            }
                             startActivity(intent);
                             finish();
                         } else {
@@ -70,6 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
                         webView.post(() -> webView.loadUrl("javascript:alert('Response Error')"));
                     }
                 }
+
 
                 @Override
                 public void onFailure(Call<UserResponse> call, Throwable t) {

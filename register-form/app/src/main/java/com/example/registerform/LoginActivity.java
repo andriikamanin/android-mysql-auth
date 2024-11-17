@@ -51,10 +51,14 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
-
                         if (userResponse.isSuccess()) {
-                            Intent intent = new Intent(LoginActivity.this, SuccessActivity.class);
-                            intent.putExtra("username", userResponse.getUsername());
+                            // Извлекаем объект User
+                            UserResponse.User user = userResponse.getUser();
+                            Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+                            if (user != null) {
+                                intent.putExtra("username", user.getName());
+                                intent.putExtra("email", user.getEmail());
+                            }
                             startActivity(intent);
                             finish();
                         } else {
@@ -64,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                         webView.post(() -> webView.loadUrl("javascript:alert('Response Error')"));
                     }
                 }
+
 
                 @Override
                 public void onFailure(Call<UserResponse> call, Throwable t) {

@@ -24,4 +24,19 @@ public interface UserApi {
             @Field("email") String email,
             @Field("password") String password
     );
+
+    @FormUrlEncoded
+    @POST("update_user.php")
+    Call<UserResponse> updateUser(
+            @Field("name") String name,
+            @Field("email") String email
+    );
+
+    @FormUrlEncoded
+    @POST("get_user.php")
+    Call<UserResponse> getUser(
+            @Field("email") String email
+    );
+
+
 }
