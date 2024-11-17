@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<form id="loginForm" class="form">
+    <p class="title">Login</p>
+    <p class="message">Enter your credentials to continue.</p>
+
+    <label>
+        <input required="" placeholder="" type="email" name="email" class="input">
+        <span>Email</span>
+    </label>
+
+    <label>
+        <input required="" placeholder="" type="password" name="password" class="input">
+        <span>Password</span>
+    </label>
+
+    <button type="submit" class="submit">Login</button>
+
+    <p class="signin">
+        Don't have an account? <a href="javascript:redirectToRegister()">Register</a>
+    </p>
+    <button onclick="Android.testConnection()">Test Connection</button>
+
+</form>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        // Передача данных в Android через интерфейс
+        Android.loginUser(email, password);
+    });
+
+    // Функция для перехода на страницу регистрации
+    function redirectToRegister() {
+        Android.redirectToRegister();
+    }
+</script>
+</body>
+</html>
