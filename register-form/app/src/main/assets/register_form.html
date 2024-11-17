@@ -27,7 +27,6 @@
 </form>
 
 <p>Already have an account? <a href="javascript:redirectToLogin()">Login here</a></p>
-
 <script>
     document.getElementById('registerForm').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -42,14 +41,7 @@
             console.log("Android interface not found");
         }
     });
-
-    function redirectToLogin() {
-        if (Android) {
-            Android.redirectToLogin();
-        } else {
-            console.log("Android interface not found");
-        }
-    }
 </script>
+
 </body>
 </html>

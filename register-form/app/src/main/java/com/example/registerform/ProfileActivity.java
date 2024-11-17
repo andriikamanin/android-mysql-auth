@@ -19,6 +19,26 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.registerform.models.UserResponse;
+import com.example.registerform.network.ApiService;
+import com.example.registerform.network.UserApi;
+import com.squareup.picasso.Picasso;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "ProfileActivity";
@@ -49,9 +69,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         if (userEmail == null || userEmail.isEmpty()) {
             Toast.makeText(this, "No email provided!", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "No email provided to load user data.");
             return;
         }
-
 
         UserApi userApi = ApiService.getRetrofitInstance().create(UserApi.class);
         Call<UserResponse> call = userApi.getUser(userEmail);
@@ -59,27 +79,41 @@ public class ProfileActivity extends AppCompatActivity {
         call.enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Получаем данные пользователя из ответа
-                    UserResponse.User user = response.body().getUser();
-                    nameEditText.setText(user.getUsername());
-                    emailEditText.setText(user.getEmail());
+                if (response.isSuccessful() && response.body() != null) {
+                    UserResponse userResponse = response.body();
+                    if (userResponse.isSuccess() && userResponse.getUser() != null) {
+                        // Получаем данные пользователя из ответа
+                        UserResponse.User user = userResponse.getUser();
 
-                    // Загружаем аватар
-                    Picasso.get()
-                            .load(user.getUserAvatar())
-                            .placeholder(R.drawable.ic_avatar_placeholder) // Плейсхолдер на случай отсутствия аватарки
-                            .error(R.drawable.ic_avatar_placeholder) // Плейсхолдер на случай ошибки
-                            .into(avatarImageView);
+                        // Устанавливаем данные пользователя
+                        nameEditText.setText(user.getUsername() != null ? user.getUsername() : "N/A");
+                        emailEditText.setText(user.getEmail() != null ? user.getEmail() : "N/A");
+
+                        // Загружаем аватар
+                        String avatarUrl = user.getUserAvatar();
+                        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+                            Picasso.get()
+                                    .load(avatarUrl)
+                                    .placeholder(R.drawable.ic_avatar_placeholder)
+                                    .error(R.drawable.ic_avatar_placeholder)
+                                    .into(avatarImageView);
+                        } else {
+                            avatarImageView.setImageResource(R.drawable.ic_avatar_placeholder);
+                            Log.w(TAG, "User avatar is empty or null.");
+                        }
+                    } else {
+                        Log.e(TAG, "Error loading user data: " + userResponse.getMessage());
+                        Toast.makeText(ProfileActivity.this, "Failed to load user data: " + userResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Log.d(TAG, "Error loading user data: " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    Log.e(TAG, "Server error while loading user data. Code: " + response.code());
                     Toast.makeText(ProfileActivity.this, "Failed to load user data", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Log.e(TAG, "Error loading user data: " + t.getMessage());
+                Log.e(TAG, "Error loading user data: " + t.getMessage(), t);
                 Toast.makeText(ProfileActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -100,17 +134,24 @@ public class ProfileActivity extends AppCompatActivity {
         call.enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(ProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful() && response.body() != null) {
+                    UserResponse userResponse = response.body();
+                    if (userResponse.isSuccess()) {
+                        Toast.makeText(ProfileActivity.this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Profile updated successfully.");
+                    } else {
+                        Log.e(TAG, "Error updating user data: " + userResponse.getMessage());
+                        Toast.makeText(ProfileActivity.this, "Failed to update profile: " + userResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Log.d(TAG, "Error updating user data: " + (response.body() != null ? response.body().getMessage() : "Unknown error"));
+                    Log.e(TAG, "Server error while updating profile. Code: " + response.code());
                     Toast.makeText(ProfileActivity.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Log.e(TAG, "Error updating user data: " + t.getMessage());
+                Log.e(TAG, "Error updating user data: " + t.getMessage(), t);
                 Toast.makeText(ProfileActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

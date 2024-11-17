@@ -2,6 +2,7 @@ package com.example.registerform;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -18,26 +19,23 @@ import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    private WebView webView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        WebView webView = findViewById(R.id.webView);
+        webView = findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
+        webSettings.setJavaScriptEnabled(true); // Включаем поддержку JavaScript
+        webSettings.setDomStorageEnabled(true); // Включаем поддержку DOM-хранилища
 
-        webView.setWebViewClient(new WebViewClient());
+        webView.setWebViewClient(new WebViewClient()); // Открытие ссылок в WebView
         webView.loadUrl("file:///android_asset/register_form.html");
 
+        // Добавляем интерфейс для взаимодействия с JavaScript
         webView.addJavascriptInterface(new WebAppInterface(webView), "Android");
-    }
-    @JavascriptInterface
-    public void redirectToLogin() {
-        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish(); // Закрыть текущую RegisterActivity
     }
 
     public class WebAppInterface {
@@ -53,34 +51,45 @@ public class RegisterActivity extends AppCompatActivity {
             Call<UserResponse> call = userApi.registerUser(username, email, password);
 
             call.enqueue(new Callback<UserResponse>() {
-
                 @Override
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                    Log.d("RegisterActivity", "Response received: " + response.toString());
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
 
                         if (userResponse.isSuccess()) {
-                            // Извлекаем объект User
-                            UserResponse.User user = userResponse.getUser();
-                            Intent intent = new Intent(RegisterActivity.this, ProfileActivity.class);
-                            intent.putExtra("email", userResponse.getUser().getEmail()); // Передача email
+                            Log.d("RegisterActivity", "User registered successfully. Redirecting to LoginActivity...");
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                             startActivity(intent);
                             finish();
-
                         } else {
-                            webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
+                            String message = userResponse.getMessage() != null
+                                    ? userResponse.getMessage()
+                                    : "Unknown error occurred";
+                            Log.e("RegisterActivity", "Registration failed: " + message);
+                            webView.post(() -> webView.loadUrl("javascript:alert('Error: " + message + "')"));
                         }
                     } else {
+                        Log.e("RegisterActivity", "Response error. Code: " + response.code());
                         webView.post(() -> webView.loadUrl("javascript:alert('Response Error')"));
                     }
                 }
 
-
                 @Override
                 public void onFailure(Call<UserResponse> call, Throwable t) {
+                    Log.e("RegisterActivity", "Failed to connect to server: " + t.getMessage());
                     webView.post(() -> webView.loadUrl("javascript:alert('Failed to connect to server')"));
                 }
             });
+
+
+        }
+
+        @JavascriptInterface
+        public void redirectToLogin() {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish(); // Закрыть текущую RegisterActivity
         }
     }
 }
