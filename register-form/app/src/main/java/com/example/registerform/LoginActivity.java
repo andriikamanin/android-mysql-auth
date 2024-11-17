@@ -6,16 +6,16 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
-import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.registerform.models.UserResponse;
 import com.example.registerform.network.ApiService;
 import com.example.registerform.network.UserApi;
-import androidx.appcompat.app.AppCompatActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 public class LoginActivity extends AppCompatActivity {
 
     @Override
@@ -26,11 +26,11 @@ public class LoginActivity extends AppCompatActivity {
         WebView webView = findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
 
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("file:///android_asset/login_form.html");
 
-        // Добавляем интерфейс для взаимодействия с JavaScript
         webView.addJavascriptInterface(new WebAppInterface(webView), "Android");
     }
 
@@ -51,8 +51,12 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
+
                         if (userResponse.isSuccess()) {
-                            webView.post(() -> webView.loadUrl("javascript:alert('Login successful!')"));
+                            Intent intent = new Intent(LoginActivity.this, SuccessActivity.class);
+                            intent.putExtra("username", userResponse.getUsername());
+                            startActivity(intent);
+                            finish();
                         } else {
                             webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
                         }

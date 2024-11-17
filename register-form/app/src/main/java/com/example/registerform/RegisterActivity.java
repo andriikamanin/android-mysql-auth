@@ -1,29 +1,16 @@
 package com.example.registerform;
+
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.registerform.models.UserResponse;
-import com.example.registerform.network.ApiService;
-import com.example.registerform.network.UserApi;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-
+import com.example.registerform.models.UserResponse;
+import com.example.registerform.network.ApiService;
+import com.example.registerform.network.UserApi;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,11 +26,18 @@ public class RegisterActivity extends AppCompatActivity {
         WebView webView = findViewById(R.id.webView);
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
 
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("file:///android_asset/register_form.html");
 
         webView.addJavascriptInterface(new WebAppInterface(webView), "Android");
+    }
+    @JavascriptInterface
+    public void redirectToLogin() {
+        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish(); // Закрыть текущую RegisterActivity
     }
 
     public class WebAppInterface {
@@ -63,8 +57,12 @@ public class RegisterActivity extends AppCompatActivity {
                 public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         UserResponse userResponse = response.body();
+
                         if (userResponse.isSuccess()) {
-                            webView.post(() -> webView.loadUrl("javascript:alert('Registration successful!')"));
+                            Intent intent = new Intent(RegisterActivity.this, SuccessActivity.class);
+                            intent.putExtra("username", userResponse.getUsername());
+                            startActivity(intent);
+                            finish();
                         } else {
                             webView.post(() -> webView.loadUrl("javascript:alert('Error: " + userResponse.getMessage() + "')"));
                         }
@@ -78,12 +76,6 @@ public class RegisterActivity extends AppCompatActivity {
                     webView.post(() -> webView.loadUrl("javascript:alert('Failed to connect to server')"));
                 }
             });
-        }
-
-        @JavascriptInterface
-        public void redirectToLogin() {
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
         }
     }
 }
